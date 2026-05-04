@@ -1,0 +1,20 @@
+# yammer-scan cron entry (Linux)
+#
+# Install:
+#   crontab -l > /tmp/cron.tmp 2>/dev/null
+#   cat cron-template.txt >> /tmp/cron.tmp
+#   crontab /tmp/cron.tmp
+#
+# Remove: crontab -e and delete the relevant lines
+#
+# The 12h debounce in the script means multiple triggers per day are safe
+# (only one will actually scan, the rest are no-ops).
+#
+# Tokens: ensure the script uses an env file or libsecret/keyring rather
+# than cron-time interactive auth. cron has minimal env, so $PATH and
+# any tool locations need to be explicit.
+
+PATH=/usr/local/bin:/usr/bin:/bin:/snap/bin
+
+# 06:00, 09:00, 13:00 daily
+0 6,9,13 * * * /home/USERNAME/bin/yammer-scan.sh >> /home/USERNAME/.local/state/yammer/scan.log 2>&1

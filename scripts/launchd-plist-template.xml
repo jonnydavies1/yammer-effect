@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Template launchd plist for yammer-scan.
+  Replace USERNAME with the actual username, and adjust paths if homebrew lives elsewhere.
+
+  Multiple StartCalendarInterval entries cover the case where the Mac is asleep at the
+  primary trigger time. The script's debounce logic ensures only one run per 12h window.
+
+  Load: launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.USERNAME.yammer-scan.plist
+  Unload: launchctl bootout gui/$UID/com.USERNAME.yammer-scan
+  Status: launchctl print gui/$UID/com.USERNAME.yammer-scan
+  Force run: launchctl kickstart -k gui/$UID/com.USERNAME.yammer-scan
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.USERNAME.yammer-scan</string>
+
+  <key>Program</key>
+  <string>/Users/USERNAME/bin/yammer-scan.sh</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/USERNAME/bin/yammer-scan.sh</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict>
+      <key>Hour</key><integer>6</integer>
+      <key>Minute</key><integer>0</integer>
+    </dict>
+    <dict>
+      <key>Hour</key><integer>9</integer>
+      <key>Minute</key><integer>0</integer>
+    </dict>
+    <dict>
+      <key>Hour</key><integer>13</integer>
+      <key>Minute</key><integer>0</integer>
+    </dict>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/USERNAME</string>
+
+  <key>StandardOutPath</key>
+  <string>/Users/USERNAME/Library/Logs/yammer-scan.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/USERNAME/Library/Logs/yammer-scan.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>HOME</key>
+    <string>/Users/USERNAME</string>
+  </dict>
+</dict>
+</plist>
