@@ -297,6 +297,15 @@ ensure_stack_options() {
     return 0
   fi
 
+  # Dry-run: surface what the schema mutation would be, but never PATCH.
+  # The DB write here is the same kind of mutation /pages writes are, so it
+  # must respect DRY_RUN to keep the safety promise in README and SKILL.md.
+  if [ "$DRY_RUN" -eq 1 ]; then
+    log "[dry-run] would add stack options: ${to_add[*]}"
+    USE_STACK=("${proposed[@]}")
+    return 0
+  fi
+
   local merged_json
   merged_json="$(get_db_schema | jq --argjson new "$(printf '%s\n' "${to_add[@]}" | jq -R . | jq -s .)" \
     '[.properties.Stack.multi_select.options[].name] + $new | unique | map({name: .})')"

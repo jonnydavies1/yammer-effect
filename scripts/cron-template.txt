@@ -1,6 +1,16 @@
 # yammer-scan cron entry (Linux)
 #
-# Install:
+# IMPORTANT: this template is provided as a scheduling reference, but
+# scripts/yammer-scan-template.sh as shipped will NOT run on Linux without
+# porting. It uses macOS-specific calls:
+#   - `security` (macOS Keychain) for token storage
+#   - `stat -f %m` (BSD) for folder mtime
+#   - `date -r <epoch>` and `date '+...'` flags that diverge from GNU coreutils
+#   - log/cache paths under `~/Library/...`
+# Replace those before relying on this cron entry. v1 is dogfooded on macOS
+# only; Linux porting is a known follow-up.
+#
+# Install (after porting):
 #   crontab -l > /tmp/cron.tmp 2>/dev/null
 #   cat cron-template.txt >> /tmp/cron.tmp
 #   crontab /tmp/cron.tmp

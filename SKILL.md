@@ -55,7 +55,7 @@ Output to user: which paths exist, what was found in each, total counts. **Stop 
 
 ### Phase 2: Database setup
 
-Default target: Notion. Other supported targets: Airtable, local SQLite (see `references/db-targets.md`).
+Default target: Notion. Other designed targets (not yet implemented): Airtable, local SQLite (see `references/db-targets.md`).
 
 Ask the user which workspace and parent location for the database. Never assume. The most common failure mode is creating the DB in the wrong workspace - confirm explicitly.
 

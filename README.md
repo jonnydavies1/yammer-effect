@@ -22,7 +22,7 @@ This skill builds a durable inventory of everything you have on the go and syncs
 - Scans your filesystem for git repos and project folders
 - Inventories each: git state, last activity, stack, deploy target, TODOs, sync state
 - Syncs to a Notion database (Airtable and SQLite are designed but not yet implemented — see [`references/db-targets.md`](references/db-targets.md))
-- Generates a launchd plist (macOS) or cron template (Linux) for recurring scans — the macOS path is what's been dogfooded; Linux is the same script with a different scheduler
+- Generates a launchd plist (macOS) for recurring scans — macOS only in v1; Linux support is template-level (cron entry provided) but the script's Keychain/`stat`/`date` calls are BSD-shaped and need porting before it'll run
 - Provides an on-demand manual trigger
 - Preserves your manual fields (Priority, Notes, Owner) across upserts
 
@@ -45,6 +45,25 @@ The output is a database you can filter by stalled, needs-review, or high-priori
 3. Restart Claude Code (or run `/skills` to refresh).
 4. The skill auto-triggers when you mention "Yammer Effect", "inventory my projects", "scan my repos", or similar phrases — see `SKILL.md` for the full trigger list.
 
+## Dependencies
+
+The scan script is bash and shells out to standard tools. Required on the host:
+
+- `bash` 4+ (for `mapfile`, associative arrays, process substitution)
+- `jq` — JSON parsing and payload construction
+- `curl` — Notion API calls
+- `rg` (ripgrep) — TODO/FIXME counting and linked-doc URL extraction
+- `gh` (GitHub CLI) — open-PR counts; needs `gh auth login` once
+- `git` — repo state, history, working-tree status
+- POSIX userland: `awk`, `sed`, `find`, `xargs`, `stat`, `date`, `tr`, `grep`
+
+macOS-specific (v1):
+
+- `security` (macOS Keychain) — built-in; the script reads the Notion integration token from a keychain entry named `yammer-scan`
+- BSD `stat -f` and `date -r` — the script's invocations don't match GNU coreutils flags
+
+Notion side: an internal integration with the database shared via Notion's Connections UI. The skill workflow walks you through this setup.
+
 ## Quick start
 
 A typical first run, in five steps:
@@ -53,7 +72,7 @@ A typical first run, in five steps:
 2. **Confirm scan paths** — Claude proposes candidate folders (`~/code`, `~/projects`, `~/Desktop`, etc.) and stops to confirm before scanning.
 3. **Confirm Notion as your target** — confirm the workspace and parent page explicitly. Wrong workspace = rework.
 4. **Dry run first** — always. The skill scans, classifies every folder, and shows you the payloads before writing anything.
-5. **Real sync, then schedule** — once the dry run looks right, do the real sync and load the launchd plist (macOS) or cron entry (Linux; macOS dogfooded, Linux untested in v1). The script debounces 12h so multiple triggers a day are safe.
+5. **Real sync, then schedule** — once the dry run looks right, do the real sync and load the launchd plist (macOS only in v1). A cron template is provided for Linux but the script itself uses macOS Keychain, BSD `stat -f`, and BSD `date -r` and won't run on Linux without porting. The 12h debounce means multiple triggers a day are safe.
 
 After that, the inventory updates itself. Open it on your phone, filter for "stalled and high priority", and triage.
 
